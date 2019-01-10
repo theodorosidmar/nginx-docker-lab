@@ -1,0 +1,39 @@
+version: '3'
+services:
+  desafio-server:
+    image: desafio-server:latest
+    container_name: desafio-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODEJS_API_PORT=8080
+    tty: true
+    restart: on-failure
+    ports:
+      - 8081:8080
+    depends_on:
+      - desafio-database
+  desafio-database:
+    image: mysql:5.7
+    container_name: desafio-database
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret
+      - MYSQL_DATABASE=notes
+      - MYSQL_USER=notes-api
+      - MYSQL_PASSWORD=notes-api
+    tty: true
+    restart: on-failure
+    ports:
+      - 3306:3306
+    volumes:
+      - ./seeds:/docker-entrypoint-initdb.d/
+  desafio-nginx:
+    image: nginx:1.14
+    container_name: desafio-nginx
+    tty: true
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
